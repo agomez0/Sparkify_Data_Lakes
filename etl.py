@@ -12,6 +12,10 @@ config.read('dl.cfg')
 os.environ['AWS_ACCESS_KEY_ID']=config['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS_SECRET_ACCESS_KEY']
 
+"""
+This function initiates a Spark session on the AWS clsuter
+
+"""
 
 def create_spark_session():
     spark = SparkSession \
@@ -20,6 +24,16 @@ def create_spark_session():
         .getOrCreate()
     return spark
 
+"""
+Function that reads in data from S3 and writes it into
+dimensional tables. It then writes the tables to
+parquet files.
+
+Parameters:
+    spark: spark connection
+    input_data: path to S3 location
+    output_data: path to S3 output location
+"""
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
@@ -47,6 +61,18 @@ def process_song_data(spark, input_data, output_data):
     
     # write artists table to parquet files
     artists_table.write.parquet(path = output_data + "/artists/artists.parquet", mode = "overwrite")
+
+"""
+Function that reads in data from S3 and writes it into 
+dimensional tables, and joins the song and log datasets
+to create a fact table. It then writes the tables to 
+parquet files.
+
+Parameters:
+    spark: spark connection
+    input_data: file path to S3 location
+    output_data: file path to S3 output location
+"""
 
 
 def process_log_data(spark, input_data, output_data):
@@ -112,7 +138,7 @@ def process_log_data(spark, input_data, output_data):
 def main():
     spark = create_spark_session()
     input_data = "s3a://udacity-dend/"
-    output_data = "s3a://jk-loaded-data"
+    output_data = "s3a://output-data"
     
     process_song_data(spark, input_data, output_data)    
     process_log_data(spark, input_data, output_data)
